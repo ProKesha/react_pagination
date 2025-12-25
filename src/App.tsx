@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './App.css';
+import { useSearchParams } from 'react-router-dom';
 import { getNumbers } from './utils';
 import { Pagination } from './components/Pagination';
 
 const items = getNumbers(1, 42).map(n => `Item ${n}`);
 
 export const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [perPage, setPerPage] = useState<number>(5);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const currentPage = Number(searchParams.get('page')) || 1;
+  const perPage = Number(searchParams.get('perPage')) || 5;
 
   const start = (currentPage - 1) * perPage;
   const end = start + perPage;
@@ -17,9 +20,20 @@ export const App: React.FC = () => {
 
   const visibleItems = items.slice(start, end);
 
+  const handlePageChange = (page: number) => {
+    setSearchParams({
+      page: String(page),
+      perPage: String(perPage),
+    });
+  };
+
   const handlePerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setPerPage(Number(event.target.value));
-    setCurrentPage(1);
+    const newPerPage = Number(event.target.value);
+
+    setSearchParams({
+      page: '1',
+      perPage: String(newPerPage),
+    });
   };
 
   return (
@@ -55,7 +69,7 @@ export const App: React.FC = () => {
         total={items.length}
         perPage={perPage}
         currentPage={currentPage}
-        onPageChange={setCurrentPage}
+        onPageChange={handlePageChange}
       />
 
       <ul>
